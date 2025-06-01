@@ -14,21 +14,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/cursos")
+@RequestMapping("/courses")
 public class CourseController {
 
     @Autowired
     private CourseService courseService;
 
+    // Método utilitário para converter String em enum Category
+    private Course.Category parseCategory(String category) {
+        try {
+            return Course.Category.valueOf(category.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResourceNotFoundException("Invalid category: " + category);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Course> createCourse(@Valid @RequestBody CourseCreateDTO courseDTO) {
         Course course = new Course();
         course.setName(courseDTO.getName());
-        try {
-            course.setCategory(Course.Category.valueOf(courseDTO.getCategory().toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Invalid category: " + courseDTO.getCategory());
-        }
+        course.setCategory(parseCategory(courseDTO.getCategory())); // aqui converte pra enum
         course.setActive(true);
         Course savedCourse = courseService.createCourse(course);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCourse);
@@ -52,11 +57,7 @@ public class CourseController {
             existingCourse.setName(courseDTO.getName());
         }
         if (courseDTO.getCategory() != null) {
-            try {
-                existingCourse.setCategory(Course.Category.valueOf(courseDTO.getCategory().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new ResourceNotFoundException("Invalid category: " + courseDTO.getCategory());
-            }
+            existingCourse.setCategory(parseCategory(courseDTO.getCategory())); // usar utilitário
         }
 
         Course updatedCourse = courseService.updateCourse(existingCourse);

@@ -33,7 +33,7 @@ public class CourseService {
             }
             if (category != null && !category.isEmpty()) {
                 try {
-                    Course.Category enumCategory = Course.Category.valueOf(category.toUpperCase());
+                    String enumCategory = String.valueOf(category.toUpperCase());
                     predicates.add(cb.equal(root.get("category"), enumCategory));
                 } catch (IllegalArgumentException e) {
                     throw new ResourceNotFoundException("Invalid category: " + category);
